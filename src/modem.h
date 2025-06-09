@@ -1,9 +1,11 @@
 #ifndef A76XXMODEM_H_
 #define A76XXMODEM_H_
 
+#include "A76XX.h"
+
 class A76XX {
   public:
-    ModemSerial                            serial;
+    ModemSerial&                           serial;
     int8_t                       _last_error_code;
     InternetServiceCommands       internetService;
     NetworkCommands                       network;
@@ -19,7 +21,7 @@ class A76XX {
         @param [IN] serial Serial interface to the SIMCOM module. Must be
             initialised separately with `begin` and the appropriate TX/RX pins.
     */
-    A76XX(Stream& stream);
+    A76XX(ModemSerial& mySerial);
 
     /*
         @brief Get the return code of the last operation.

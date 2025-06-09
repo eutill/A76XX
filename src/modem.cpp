@@ -1,7 +1,7 @@
 #include "A76XX.h"
 
-A76XX::A76XX(Stream& stream)
-    : serial(stream)
+A76XX::A76XX(ModemSerial& mySerial)
+    : serial(mySerial)
     , _last_error_code(0)
     , internetService(serial)
     , network(serial)

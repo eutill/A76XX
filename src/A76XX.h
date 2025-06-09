@@ -1,7 +1,11 @@
 #ifndef A76XX_H_
 #define A76XX_H_
 
-#include "Arduino.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+
+//#include "Arduino.h"
 #include "time.h"
 
 #ifndef A76XX_URC_QUEUE_SIZE
@@ -106,9 +110,12 @@ enum Response_t {
     }
 
 #include "utils/base64.h"
+#include "utils/circbuf.h"
 
 #include "event_handlers.h"
 #include "modem_serial.h"
+#include "modem_serial_esp.h"
+#include "modem_serial_arduino.h"
 
 #include "commands/internet_service.h"
 #include "commands/serial_interface.h"
@@ -130,4 +137,4 @@ enum Response_t {
 #include "clients/http.h"
 #include "clients/gnss.h"
 
-#endif A76XX_H_
+#endif /* A76XX_H_ */
