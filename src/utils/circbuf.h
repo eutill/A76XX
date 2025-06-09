@@ -27,6 +27,7 @@ public:
     cmp_match_t compare(const char* str);
     size_t consume(size_t n);
     bool endsWith(const char* str);
+    bool peek(uint8_t* val);
     ~CircBuf();
 private:
     unsigned char* _buf;

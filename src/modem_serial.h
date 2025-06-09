@@ -131,11 +131,11 @@ class ModemSerial {
 
         @param [IN] args Items (string, numbers, ...) to be sent.
         @param [IN] finish Whether to send a terminating "\r\n" to the module.
-    *//*
+    */
     template <typename... ARGS>
     void sendCMD(ARGS... args) {
         printCMD(args..., "\r\n");
-    }*/
+    }
 
     /*
         @brief Print data to the module's serial port.
@@ -145,20 +145,18 @@ class ModemSerial {
 
         @param [IN] args Items (string, numbers, ...) to be sent.
         @param [IN] finish Whether to send a terminating "\r\n" to the module.
-    *//*
+    */
     template <typename HEAD, typename... TAIL>
     void printCMD(HEAD head, TAIL... tail) {
-        _stream.print(head); 
-        flush();
-        printCMD(tail...);
+        printCMD(head);
+        printCMD(tail...); //recursively calls this function until base case: no arguments
     }
 
     // single argument case
-    template <typename ARG>
-    void printCMD(ARG arg) {
-        _stream.print(arg); 
-        flush();
-    }*/
+    virtual void printCMD(uint16_t val) = 0;
+    virtual void printCMD(const char* str) = 0;
+    // base case: do nothing
+    void printCMD(void) {}
 
     /*
         @brief Parse an integer number and then consume all data available in the 
@@ -188,10 +186,10 @@ class ModemSerial {
     // The following functions are simply forwarding the calls to underlying stream 
     // object. If you need others, send a pull request!
     virtual int available() = 0;
-    //virtual long parseInt() = 0;
+    virtual long parseInt() = 0;
     //virtual float parseFloat() = 0;
     virtual void flush() = 0;
-    //virtual char peek() = 0;
+    virtual int peek() = 0;
     virtual int read() = 0;
 
 /*
@@ -209,12 +207,9 @@ class ModemSerial {
     uint16_t readBytesUntil(ARGS... args) { 
         return _stream.readBytesUntil(args...); 
     }
+*/
+    virtual size_t readBytes(void* buf, int len) = 0;
 
-    template <typename... ARGS>
-    uint16_t readBytes(ARGS... args) { 
-        return _stream.readBytes(args...); 
-    }
-    */
 };
 
 #endif /* A76XX_MODEMUART_H_ */

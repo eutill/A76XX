@@ -8,6 +8,11 @@
 //#include "Arduino.h"
 #include "time.h"
 
+#ifndef A76XX_SERIAL_TIMEOUT_DEFAULT
+    /* Sets the timeout for serial read methods where no explicit timeout is given */
+    #define A76XX_SERIAL_TIMEOUT_DEFAULT 1000
+#endif
+
 #ifndef A76XX_URC_QUEUE_SIZE
     /* Controls the size of the queue where URCs are stored */
     #define A76XX_URC_QUEUE_SIZE 10

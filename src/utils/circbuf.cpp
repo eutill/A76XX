@@ -103,6 +103,14 @@ bool CircBuf::endsWith(const char* str) {
     return true;
 }
 
+bool CircBuf::peek(uint8_t* val) {
+    if(getUsed() > 0) {
+        *val = _buf[_tail];
+        return true;
+    }
+    return false;
+}
+
 
 
 

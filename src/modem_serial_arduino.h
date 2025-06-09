@@ -1,6 +1,6 @@
 #ifndef A76XX_MODEMUART_ARDUINO_H_
 #define A76XX_MODEMUART_ARDUINO_H_
-
+//#define ARDUINO
 #ifdef ARDUINO
 
 #include "modem_serial.h"
@@ -52,7 +52,7 @@ class ModemSerialArduino : public ModemSerial {
             not established.
     */
     ModemSerialArduino(Stream& stream)
-        : _stream(stream) {}
+        : _stream(stream) {_stream.setTimeout(A76XX_SERIAL_TIMEOUT_DEFAULT);}
 
     /*
         @brief Wait for modem to respond.
@@ -115,6 +115,12 @@ class ModemSerialArduino : public ModemSerial {
         return Response_t::A76XX_RESPONSE_TIMEOUT;
     }
 
+    template <typename ARG>
+    void printCMD(ARG arg) override {
+        _stream.print(arg);
+        flush();
+    }
+
     int available() override {
         return _stream.available();
     }
@@ -131,12 +137,16 @@ class ModemSerialArduino : public ModemSerial {
         _stream.flush();
     }
 
-    char peek() override {
+    int peek() override {
         return _stream.peek();
     }
 
     int read() override {
         return _stream.read();
+    }
+
+    size_t readBytes(void* buf, int len) override {
+        return _stream.readBytes(buf, len);
     }
 };
 

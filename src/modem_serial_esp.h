@@ -59,7 +59,7 @@ class ModemSerialESP : public ModemSerial {
         TickType_t startTime = xTaskGetTickCount();
         TickType_t timeoutTicks = pdMS_TO_TICKS(timeout);
 
-        _buf.clear();
+        //_buf.clear();
         const char* cmp_str[5] = {
                 match_1,
                 match_2,
@@ -92,7 +92,10 @@ class ModemSerialESP : public ModemSerial {
 
             for(cmp_idx = 0; cmp_idx<5; cmp_idx++) {
                 if(!cmp_str[cmp_idx]) continue;
-                if(_buf.endsWith(cmp_str[cmp_idx])) return resp[cmp_idx];
+                if(_buf.endsWith(cmp_str[cmp_idx])) {
+                    _buf.clear();
+                    return resp[cmp_idx];
+                }
             }
             //do the same with URCs
             for (uint8_t i=0; i<_num_event_handlers; i++) {
@@ -106,18 +109,87 @@ class ModemSerialESP : public ModemSerial {
         return A76XX_RESPONSE_TIMEOUT;
     }
 
+    void printCMD(const char* str) override {
+        uart_write_bytes(_uart, str, strlen(str));
+        flush();
+    }
+
+    void printCMD(uint16_t val) override {
+        char buf[6];
+        int len = snprintf(buf, 6, "%u", val);
+        uart_write_bytes(_uart, buf, len);
+        flush();
+    }
+
     int available() override {
         int availBytes;
         if(uart_get_buffered_data_len(_uart, (size_t *) &availBytes) != ESP_OK) {
-            return 0;
+            availBytes = 0;
         }
-        return availBytes;
-    }
-/*
-    long parseInt() override {
-        return _stream.parseInt();
+        return availBytes + _buf.getUsed();
     }
 
+    long parseInt() override {
+        //ignores all invalid characters before first valid one
+        //returns on timeout (and evaluates all valid chars up until then)
+        //or on first invalid char after valid ones.
+
+        TickType_t startTime = xTaskGetTickCount();
+        TickType_t timeoutTicks = pdMS_TO_TICKS(A76XX_SERIAL_TIMEOUT_DEFAULT);
+
+        _buf.clear(); //discard all values as ringbuffer is used as intermediate buffer
+        bool validNumber = false;
+        char validChars[] = "0123456789-";
+        char numberBuf[20];
+        uint8_t val, numberLen;
+
+        while(1) {
+            //calculate remaining time
+            TickType_t elapsedTime = xTaskGetTickCount() - startTime;
+            if(elapsedTime > timeoutTicks) return A76XX_RESPONSE_TIMEOUT;
+            TickType_t remainingTime = timeoutTicks - elapsedTime;
+
+            if(validNumber) {
+                if(uart_read_bytes(_uart, &val, 1, remainingTime) != 1) { //timeout
+                    numberLen = _buf.read((uint8_t*) numberBuf, 20);
+                    if(numberLen == 20) {return 0L;}
+                    else {numberBuf[numberLen] = '\0';}
+
+                    break; //go to evaluation
+                }
+                //check if char is valid
+                if(strchr(validChars, val)) {
+                    //store in ringbuffer
+                    _buf.write(&val, 1);
+                } else { //invalid digit after valid one(s)
+                    //transfer valid chars from ringbuffer to numberBuf
+                    numberLen = _buf.read((uint8_t*) numberBuf, 20);
+                    if(numberLen == 20) {return 0L;}
+                    else {numberBuf[numberLen] = '\0';}
+                    //store invalid digit in ringbuffer
+                    _buf.write(&val, 1);
+                    //proceed to evaluation
+                    break;
+                }
+            } else { // !validNumber
+                //look for first occurrence of a valid char
+                if(uart_read_bytes(_uart, &val, 1, remainingTime) != 1) { //timeout
+                    return 0L;
+                }
+                //check if char is valid
+                if(strchr(validChars, val)) {
+                    //store in ringbuffer
+                    _buf.write(&val, 1);
+                    //from now on, minus (-) is not a valid character
+                    validChars[10] = '\0';
+                    validNumber = true;
+                }
+            }
+        }
+        //turn valid characters into 'long' variable
+        return strtol(numberBuf, NULL, 10);
+    }
+/*
     float parseFloat() override {
         return _stream.parseFloat();
     }
@@ -125,18 +197,48 @@ class ModemSerialESP : public ModemSerial {
     void flush() override {
         uart_flush(_uart);
     }
-/*
-    char peek() override {
-        return _stream.peek();
+
+    int peek() override {
+        uint8_t val;
+        //first, peek into ringbuffer if it contains data
+        if(_buf.peek(&val)) return val;
+        //if it doesn't, transfer one byte from UART input buffer to ringbuffer
+        if(uart_read_bytes(_uart, &val, 1, 0) != 1) return -1;
+        _buf.write(&val, 1);
+        return val;
     }
-*/
+
     int read() override {
         uint8_t val;
+        if(_buf.getUsed() > 0) {
+            if(_buf.read(&val, 1) == 1) {
+                return val;
+            }
+        }
+
         if(uart_read_bytes(_uart, (void*) &val, 1, 0) == 1) {
             return val;
         }
         return -1;
     }
+
+    size_t readBytes(void* buf, int len) override {
+        //first, use data left in ringbuffer
+        size_t ringDataLen = _buf.getUsed();
+        size_t readLen = 0;
+        if(ringDataLen) {
+            readLen = _buf.read((uint8_t*) buf, len);
+            if(readLen == len) return readLen;
+        }
+        //read remaining data directly from UART
+        size_t readLen2 = uart_read_bytes(_uart, (uint8_t*)buf+readLen, len-readLen, pdMS_TO_TICKS(A76XX_SERIAL_TIMEOUT_DEFAULT));
+        if(readLen2 > 0) readLen += readLen2;
+        return readLen;
+    }
 };
+
+
+
+
 
 #endif /* A76XX_MODEMUART_ESP_H_ */
