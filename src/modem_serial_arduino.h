@@ -48,8 +48,6 @@ class ModemSerialArduino : public ModemSerial {
     Stream& _stream;
 
   public:
-    // The following functions are simply forwarding the calls to underlying stream
-    // object. If you need others, send a pull request!
 
     /*
         @brief Construct a ModemSerial object.
@@ -87,7 +85,7 @@ class ModemSerialArduino : public ModemSerial {
     Response_t waitResponse(const char* match_1,
                             const char* match_2,
                             const char* match_3,
-                            int timeout = 1000,
+                            uint32_t timeout = 1000,
                             bool match_OK = true,
                             bool match_ERROR = true) {
         // store data here
@@ -126,6 +124,9 @@ class ModemSerialArduino : public ModemSerial {
 
         return Response_t::A76XX_RESPONSE_TIMEOUT;
     }
+
+    // The following functions are simply forwarding the calls to underlying stream
+    // object. If you need others, send a pull request!
 
     void printItem(const char* str) override {
         _stream.print(str);
@@ -178,7 +179,7 @@ class ModemSerialArduino : public ModemSerial {
     }
 
     size_t readBytes(void* buf, int len) override {
-        return _stream.readBytes(buf, len);
+        return _stream.readBytes((uint8_t *) buf, len);
     }
 };
 

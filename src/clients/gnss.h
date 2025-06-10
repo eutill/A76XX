@@ -37,13 +37,14 @@ class GNSSOnNMEAMessage : public EventHandler_t {
     
     void process(ModemSerial* serial) {
         NMEAMessage_t msg;
+        uint16_t i;
 
         // copy the match string at the beginning of the message to have the full message
-        for (uint i = 0; i < strlen(match_string); i++)
+        for (i = 0; i < strlen(match_string); i++)
             msg.payload[i] = match_string[i];
         
         // keep reading from that point until <CR>, then read <LF> and close the string
-        for (uint i = strlen(match_string); i < NMEA_MESSAGE_SIZE; i++) {
+        for (i = strlen(match_string); i < NMEA_MESSAGE_SIZE; i++) {
             // wait until a char becomes available
             while (serial->available() == 0) {}
 

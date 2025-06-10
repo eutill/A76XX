@@ -1,6 +1,8 @@
 #ifndef A76XX_MODEMUART_ESP_H_
 #define A76XX_MODEMUART_ESP_H_
 
+#ifndef ARDUINO
+
 #include "modem_serial.h"
 #include "utils/byteringbuf.h"
 #include "driver/uart.h"
@@ -49,29 +51,10 @@ class ModemSerialESP : public ModemSerial {
     ModemSerialESP(uart_port_t uart)
         : _uart(uart), _buf(200) {}
 
-
-    /*
-        @brief Wait for modem to respond.
-
-        @detail Consume data from the serial port until a match is found with one of the
-            two input string or before the operation times out. If the parameters
-            `match_OK` and `match_ERROR` are true, we also check if the response
-            matches with the default OK and ERROR strings, but precedence is given
-            to matching the input strings, which is useful for some commands.
-        @param [IN] match_1 The first string to match.
-        @param [IN] match_2 The second string to match.
-        @param [IN] match_3 The third string to match.
-        @param [IN] timeout Return if no match is found within this time in milliseconds.
-            Default is 1000 milliseconds.
-        @param [IN] match_OK Whether to match the string "OK\r\n". Default is true.
-        @param [IN] match_ERROR Whether to match the string "ERROR\r\n". Default is true.
-
-        @return A Response_t object.
-    */
     Response_t waitResponse(const char* match_1,
                             const char* match_2,
                             const char* match_3,
-                            int timeout = 1000,
+                            uint32_t timeout = 1000,
                             bool match_OK = true,
                             bool match_ERROR = true) override {
 
@@ -393,6 +376,6 @@ class ModemSerialESP : public ModemSerial {
 
 
 
-
+#endif /* !defined(ARDUINO) */
 
 #endif /* A76XX_MODEMUART_ESP_H_ */

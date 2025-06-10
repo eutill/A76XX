@@ -262,8 +262,8 @@ class MQTTCommands {
     }
 
     // CMQTTPAYLOAD
-    int8_t setPayload(uint8_t client_index, const uint8_t* payload, uint length) {
-        _serial.sendCMD("AT+CMQTTPAYLOAD=0,", length);
+    int8_t setPayload(uint8_t client_index, const uint8_t* payload, uint32_t length) {
+        _serial.sendCMD("AT+CMQTTPAYLOAD=", client_index, ",", length);
 
         Response_t rsp = _serial.waitResponse(">", "+CMQTTTPAYLOAD: ", 9000);
 
