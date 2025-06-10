@@ -13,11 +13,6 @@
     #define A76XX_SERIAL_TIMEOUT_DEFAULT 1000
 #endif
 
-#ifndef A76XX_URC_QUEUE_SIZE
-    /* Controls the size of the queue where URCs are stored */
-    #define A76XX_URC_QUEUE_SIZE 10
-#endif
-
 #ifndef A76XX_MAX_EVENT_HANDLERS
     /* Controls the maximum number of event handlers that are stored in A76XX::ModemSerial  */
     #define A76XX_MAX_EVENT_HANDLERS 10
@@ -115,7 +110,8 @@ enum Response_t {
     }
 
 #include "utils/base64.h"
-#include "utils/circbuf.h"
+#include "utils/byteringbuf.h"
+#include "utils/CircularBuffer.hpp"
 
 #include "event_handlers.h"
 #include "modem_serial.h"

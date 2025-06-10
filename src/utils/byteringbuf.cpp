@@ -1,5 +1,5 @@
 /*
- * circbuf.cpp
+ * byteringbuf.cpp
  *
  *  Created on: 09.06.2025
  *      Author: leo
@@ -7,26 +7,26 @@
 
 #include "A76XX.h"
 
-CircBuf::CircBuf(size_t sizeBytes) : _size(sizeBytes), _head(0), _tail(0) {
+ByteRingBuf::ByteRingBuf(size_t sizeBytes) : _size(sizeBytes), _head(0), _tail(0) {
     _buf = new unsigned char[sizeBytes];
 }
 
-CircBuf::~CircBuf(void) {
+ByteRingBuf::~ByteRingBuf(void) {
     delete[] _buf;
 }
 
-size_t CircBuf::getFree() {
+size_t ByteRingBuf::getFree() {
     if(_tail > _head) {
         return _tail - _head - 1;
     }
     return _size - _head + _tail - 1;
 }
 
-size_t CircBuf::getUsed() {
+size_t ByteRingBuf::getUsed() {
     return (_tail > _head) ? (_size - _tail + _head) : (_head - _tail);
 }
 
-size_t CircBuf::write(uint8_t* source, uint16_t len) {
+size_t ByteRingBuf::write(uint8_t* source, uint16_t len) {
     size_t writeLen = len < (_size - 1) ? len : (_size - 1);
     //determine whether we are going to overwrite valid data
     bool overwrite = writeLen > getFree();
@@ -45,7 +45,7 @@ size_t CircBuf::write(uint8_t* source, uint16_t len) {
     return writeLen;
 }
 
-size_t CircBuf::read(uint8_t* dest, uint16_t maxLen) {
+size_t ByteRingBuf::read(uint8_t* dest, uint16_t maxLen) {
     size_t readLen = getUsed();
     readLen = maxLen < readLen ? maxLen : readLen;
     size_t copyLen = _size - _tail;
@@ -60,12 +60,12 @@ size_t CircBuf::read(uint8_t* dest, uint16_t maxLen) {
     return readLen;
 }
 
-void CircBuf::clear(void) {
+void ByteRingBuf::clear(void) {
     _head = 0;
     _tail = 0;
 }
 
-cmp_match_t CircBuf::compare(const char* str) {
+cmp_match_t ByteRingBuf::compare(const char* str) {
     if(!str) return CMP_NO_MATCH;
     size_t availLen = getUsed();
     if(availLen == 0) return CMP_NO_MATCH;
@@ -81,7 +81,7 @@ cmp_match_t CircBuf::compare(const char* str) {
     return CMP_ALL_MATCH;
 }
 
-size_t CircBuf::consume(size_t n) {
+size_t ByteRingBuf::consume(size_t n) {
     size_t availLen = getUsed();
     size_t consumeLen = n < availLen ? n : availLen;
 
@@ -89,7 +89,7 @@ size_t CircBuf::consume(size_t n) {
     return consumeLen;
 }
 
-bool CircBuf::endsWith(const char* str) {
+bool ByteRingBuf::endsWith(const char* str) {
     if(!str) return false;
     size_t strLen = strlen(str);
     if(!strLen) return false;
@@ -103,7 +103,7 @@ bool CircBuf::endsWith(const char* str) {
     return true;
 }
 
-bool CircBuf::peek(uint8_t* val) {
+bool ByteRingBuf::peek(uint8_t* val) {
     if(getUsed() > 0) {
         *val = _buf[_tail];
         return true;
@@ -111,7 +111,7 @@ bool CircBuf::peek(uint8_t* val) {
     return false;
 }
 
-bool CircBuf::pop(uint8_t* val) {
+bool ByteRingBuf::pop(uint8_t* val) {
     if(peek(val)) {
         _tail = (_tail + 1) % _size;
         return true;

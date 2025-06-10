@@ -1,5 +1,5 @@
 /*
- * circbuf.h
+ * byteringbuf.h
  *
  *  Created on: 09.06.2025
  *      Author: leo
@@ -16,9 +16,9 @@ typedef enum {
     CMP_ALL_MATCH //string is completely contained in ringbuffer
 } cmp_match_t;
 
-class CircBuf {
+class ByteRingBuf {
 public:
-    CircBuf(size_t sizeBytes);
+    ByteRingBuf(size_t sizeBytes);
     size_t write(uint8_t* source, uint16_t len);
     size_t read(uint8_t* dest, uint16_t maxLen);
     void clear(void);
@@ -29,7 +29,7 @@ public:
     bool endsWith(const char* str);
     bool peek(uint8_t* val);
     bool pop(uint8_t* val);
-    ~CircBuf();
+    ~ByteRingBuf();
 private:
     unsigned char* _buf;
     size_t _size;

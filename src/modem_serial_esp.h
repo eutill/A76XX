@@ -2,7 +2,7 @@
 #define A76XX_MODEMUART_ESP_H_
 
 #include "modem_serial.h"
-#include "utils/circbuf.h"
+#include "utils/byteringbuf.h"
 #include "driver/uart.h"
 #include "esp_log.h"
 
@@ -28,7 +28,7 @@ private:
 class ModemSerialESP : public ModemSerial {
   private:
     uart_port_t _uart;
-    CircBuf _buf;
+    ByteRingBuf _buf;
 
   public:
     // The following functions are simply forwarding the calls to underlying stream
@@ -134,12 +134,12 @@ class ModemSerialESP : public ModemSerial {
         return A76XX_RESPONSE_TIMEOUT; //execution won't reach here
     }
 
-    void printCMD(const char* str) override {
+    void printItem(const char* str) override {
         uart_write_bytes(_uart, str, strlen(str));
         flush();
     }
 
-    void printCMD(uint16_t val) override {
+    void printItem(uint16_t val) override {
         char buf[6];
         int len = snprintf(buf, 6, "%u", val);
         uart_write_bytes(_uart, buf, len);
@@ -299,7 +299,7 @@ class ModemSerialESP : public ModemSerial {
     }
 
     void flush() override {
-        uart_flush(_uart);
+        uart_wait_tx_done(_uart, pdMS_TO_TICKS(A76XX_SERIAL_TIMEOUT_DEFAULT));
     }
 
     int peek() override {

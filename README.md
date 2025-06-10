@@ -23,10 +23,25 @@ The table below shows the protocols that are natively supported by the firmware 
 | TCP/IP           | No                  |
 | WebSockets[S]    | No                  |
 | WIFI             | No                  |
-| GNSS             | No                  |
+| GNSS             | Yes                 |
 
 Note that the firmware in your module might be outdated, and therefore might not support all the features listed here. You might need to update it. 
 
+## Supported parts of the [AT Command Manual V1.09](https://web.archive.org/web/20241206182547/https://bharatpi.net/wp-content/uploads/2023/12/A7672S_Series_AT_Command_Manual_V1.09.pdf)
+
+| Chapter | Title            | Client            | Client in file   | AT commands in file         |
+| ------- | ---------------- | ----------------- | ---------------- | --------------------------- |
+| 2       | V.25TER          | A76XX             | modem.h          | commands/v25ter.h           |
+| 3       | Status Control   | A76XX             | modem.h          | commands/status_control.h   |
+| 4       | Network          | A76XX             | modem.h          | commands/network.h          |
+| 5       | Packet Domain    | A76XX             | modem.h          | commands/packet_domain.h    |
+| 6       | SIM Card         | A76XX             | modem.h          | commands/sim.h              |
+| 10      | Serial Interface | A76XX             | modem.h          | commands/serial_interface.h |
+| 14      | Internet Service | A76XX             | modem.h          | commands/internet_service.h |
+| 16      | HTTP(S)          | A76XXHTTPClient   | clients/http.h   | commands/http.h             |
+| 18      | MQTT(S)          | A76XXMQTTClient   | clients/mqtt.h   | commands/mqtt.h             |
+| 19      | SSL              | A76XXSecureClient | clients/secure.h | commands/ssl.h              |
+| 24      | GNSS             | A76XXGNSSClient   | clients/gnss.h   | commands/gnss.h             |
 
 ## Supported modems
 It's difficult to say exactly what modules are compatibles with this library. SIMCOM sells a number of different 4G Cat 1 and Cat 4 modules, some branded as SIM76XX, some others as A76XX. There's also a SIM7500X module. 

@@ -96,7 +96,7 @@ class PacketDomainCommands {
     */
     int8_t getPDPContextActiveStatus(uint8_t cid, int8_t& status) {
         _serial.sendCMD("AT+CGACT?");
-        char buff[] = "+CGACT: XX,";
+        char buff[13];
         sprintf(buff, "+CGACT: %d,", cid);
         switch (_serial.waitResponse(buff, 9000)) {
             case Response_t::A76XX_RESPONSE_MATCH_1ST : {

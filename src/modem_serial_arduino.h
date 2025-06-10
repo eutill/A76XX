@@ -6,8 +6,6 @@
 #include "modem_serial.h"
 #include "Arduino.h"
 
-#include "CircularBuffer.hpp"
-
 /*
     @brief Check if the last characters in the character buffer match with a given string.
 
@@ -129,9 +127,13 @@ class ModemSerialArduino : public ModemSerial {
         return Response_t::A76XX_RESPONSE_TIMEOUT;
     }
 
-    template <typename ARG>
-    void printCMD(ARG arg) override {
-        _stream.print(arg);
+    void printItem(const char* str) override {
+        _stream.print(str);
+        flush();
+    }
+
+    void printItem(uint16_t val) override {
+        _stream.print(val);
         flush();
     }
 

@@ -10,7 +10,9 @@ A76XXHTTPClient::A76XXHTTPClient(A76XX& modem,
     , _use_ssl(use_ssl)
     , _server_name(server_name)
     , _server_port(server_port)
-    , _user_agent(user_agent) {}
+    , _user_agent(user_agent)
+    , _last_body_length(0)
+    , _last_status_code(0) {}
 
 bool A76XXHTTPClient::begin() {
     int8_t retcode = _http_cmds.init();
@@ -48,13 +50,14 @@ uint32_t A76XXHTTPClient::getResponseBodyLength() {
     return _last_body_length;
 }
 
-bool A76XXHTTPClient::getResponseHeader(String& header) {
-    int8_t retcode = _http_cmds.readHeader(header);
+bool A76XXHTTPClient::getResponseHeader(char* header, size_t max_len) {
+    int8_t retcode = _http_cmds.readHeader(header, max_len);
     A76XX_CLIENT_RETCODE_ASSERT_BOOL(retcode);
     return true;
 }
 
-bool A76XXHTTPClient::getResponseBody(String& body) {
+bool A76XXHTTPClient::getResponseBody(char* body, size_t max_len) {
+    if(max_len-1 < _last_body_length) return false;
     int8_t retcode = _http_cmds.readResponseBody(body, _last_body_length);
     A76XX_CLIENT_RETCODE_ASSERT_BOOL(retcode);
     return true;

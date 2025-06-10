@@ -121,7 +121,7 @@ class HTTPCommands {
     }
 
     // HTTPHEAD
-    int8_t readHeader(String& header) {
+    int8_t readHeader(char* header, size_t max_len) {
         _serial.sendCMD("AT+HTTPHEAD");
         Response_t rsp = _serial.waitResponse("+HTTPHEAD: ", 120000, false, true);
         switch (rsp) {
@@ -130,7 +130,7 @@ class HTTPCommands {
                 int header_length = _serial.parseInt();
 
                 // reserve space for the string
-                if (header.reserve(header_length) == 0) {
+                if (max_len-1 < header_length) {
                     return A76XX_OUT_OF_MEMORY;
                 }
 
@@ -138,12 +138,16 @@ class HTTPCommands {
                 _serial.find('\n');
 
                 // read as many bytes as we said
+                size_t readLen = _serial.readBytes(header, header_length);
+                header[readLen] = '\0';
+                /*
                 for (uint32_t i = 0; i < header_length; i++) {
                     while (_serial.available() == 0) {}
                     header += static_cast<char>(_serial.read());
-                }
+                }*/
 
                 if (_serial.waitResponse() == Response_t::A76XX_RESPONSE_OK) {
+                    if(readLen != header_length) return A76XX_GENERIC_ERROR;
                     return A76XX_OPERATION_SUCCEEDED;
                 } else {
                     return A76XX_GENERIC_ERROR;
@@ -175,8 +179,9 @@ class HTTPCommands {
         }
     }
 
-    // HTTPREAD - read entire response
-    int8_t readResponseBody(String& body, uint32_t body_length) {
+    // HTTPREAD - read entire response. When calling, be sure that the provided array
+    // can host up to body_length + 1 characters!
+    int8_t readResponseBody(char* body, uint32_t body_length) {
         _serial.sendCMD("AT+HTTPREAD=", 0, ",", body_length);
         Response_t rsp = _serial.waitResponse("+HTTPREAD: ", 120000, false, true);
         switch (rsp) {
@@ -185,23 +190,27 @@ class HTTPCommands {
                 if (_serial.parseInt() != body_length) {
                     return A76XX_GENERIC_ERROR;
                 }
-
+                /*
                 // check we can allocate the string
                 if (body.reserve(body_length) == 0) {
                     return A76XX_OUT_OF_MEMORY;
-                }
+                }*/
 
                 // advance till we start with the actual content
                 _serial.find('\n');
 
                 // read as many bytes as we said
+                size_t readLen = _serial.readBytes(body, body_length);
+                body[readLen] = '\0';
+                /*
                 for (uint32_t i = 0; i < body_length; i++) {
                     while (_serial.available() == 0) {}
                     body += static_cast<char>(_serial.read());
-                }
+                }*/
 
                 // clear stream
                 if (_serial.waitResponse("+HTTPREAD: 0") == Response_t::A76XX_RESPONSE_MATCH_1ST) {
+                    if(readLen != body_length) return A76XX_GENERIC_ERROR;
                     return A76XX_OPERATION_SUCCEEDED;
                 } else {
                     return A76XX_GENERIC_ERROR;

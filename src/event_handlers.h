@@ -45,6 +45,8 @@ class EventHandler_t {
         immediate action is required.
     */
     virtual void process(ModemSerial* serial) = 0;
+
+    virtual ~EventHandler_t() {}
 };
 
 #endif /* A76XX_EVENTHANDLER_H_ */

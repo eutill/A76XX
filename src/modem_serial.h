@@ -148,13 +148,13 @@ class ModemSerial {
     */
     template <typename HEAD, typename... TAIL>
     void printCMD(HEAD head, TAIL... tail) {
-        printCMD(head);
+        printItem(head);
         printCMD(tail...); //recursively calls this function until base case: no arguments
     }
 
     // single argument case
-    virtual void printCMD(uint16_t val) = 0;
-    virtual void printCMD(const char* str) = 0;
+    virtual void printItem(uint16_t val) = 0;
+    virtual void printItem(const char* str) = 0;
     // base case: do nothing
     void printCMD(void) {}
 
@@ -197,6 +197,7 @@ class ModemSerial {
     virtual size_t readBytesUntil(char terminator, char* buf, int len) = 0;
     virtual size_t readBytes(void* buf, int len) = 0;
 
+    virtual ~ModemSerial() {}
 };
 
 #endif /* A76XX_MODEMUART_H_ */
