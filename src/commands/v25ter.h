@@ -68,7 +68,7 @@ class V25TERCommands {
         // clear stream before sending command, then get rid of the first line
         _serial.clear();
         _serial.sendCMD("AT+CGMM");
-        _serial.find("\r\n");
+        _serial.find('\n');
         uint32_t tstart = millis();
         while (millis() - tstart < 5000) {
             if (_serial.available() > 0) {
@@ -117,4 +117,4 @@ class V25TERCommands {
     }
 };
 
-#endif A76XX_V25TER_CMDS_H_
+#endif /* A76XX_V25TER_CMDS_H_ */

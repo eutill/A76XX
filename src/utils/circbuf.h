@@ -28,6 +28,7 @@ public:
     size_t consume(size_t n);
     bool endsWith(const char* str);
     bool peek(uint8_t* val);
+    bool pop(uint8_t* val);
     ~CircBuf();
 private:
     unsigned char* _buf;

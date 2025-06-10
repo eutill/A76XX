@@ -79,20 +79,25 @@ class ModemSerialESP : public ModemSerial {
         while(1) {
             //calculate remaining time
             TickType_t elapsedTime = xTaskGetTickCount() - startTime;
-            if(elapsedTime > timeoutTicks) return A76XX_RESPONSE_TIMEOUT;
+            if(elapsedTime > timeoutTicks) { //timeout
+                _buf.clear();
+                return A76XX_RESPONSE_TIMEOUT;
+            }
             TickType_t remainingTime = timeoutTicks - elapsedTime;
 
             //wait and fetch a char from uart, with timeout
             uint8_t val;
             if(uart_read_bytes(_uart, &val, 1, remainingTime) > 0) {
                 _buf.write(&val, 1);
-            } else {
+            } else { //timeout
+                _buf.clear();
                 return A76XX_RESPONSE_TIMEOUT;
             }
 
             for(cmp_idx = 0; cmp_idx<5; cmp_idx++) {
                 if(!cmp_str[cmp_idx]) continue;
                 if(_buf.endsWith(cmp_str[cmp_idx])) {
+                    //found match!
                     _buf.clear();
                     return resp[cmp_idx];
                 }
@@ -100,13 +105,14 @@ class ModemSerialESP : public ModemSerial {
             //do the same with URCs
             for (uint8_t i=0; i<_num_event_handlers; i++) {
                 if (_buf.endsWith(_event_handlers[i]->match_string)) {
+                    //found match with registered URCs. Send event, then continue
                     _event_handlers[i]->process(this);
                     _buf.clear();
                     break;
                 }
             }
         }
-        return A76XX_RESPONSE_TIMEOUT;
+        return A76XX_RESPONSE_TIMEOUT; //execution won't reach here
     }
 
     void printCMD(const char* str) override {
@@ -146,14 +152,19 @@ class ModemSerialESP : public ModemSerial {
         while(1) {
             //calculate remaining time
             TickType_t elapsedTime = xTaskGetTickCount() - startTime;
-            if(elapsedTime > timeoutTicks) return A76XX_RESPONSE_TIMEOUT;
+            if(elapsedTime > timeoutTicks) { //timeout
+                _buf.clear();
+                return 0L;
+            }
             TickType_t remainingTime = timeoutTicks - elapsedTime;
 
             if(validNumber) {
                 if(uart_read_bytes(_uart, &val, 1, remainingTime) != 1) { //timeout
                     numberLen = _buf.read((uint8_t*) numberBuf, 20);
-                    if(numberLen == 20) {return 0L;}
-                    else {numberBuf[numberLen] = '\0';}
+                    if(numberLen == 20) {
+                        _buf.clear();
+                        return 0L;
+                    } else {numberBuf[numberLen] = '\0';}
 
                     break; //go to evaluation
                 }
@@ -164,8 +175,11 @@ class ModemSerialESP : public ModemSerial {
                 } else { //invalid digit after valid one(s)
                     //transfer valid chars from ringbuffer to numberBuf
                     numberLen = _buf.read((uint8_t*) numberBuf, 20);
-                    if(numberLen == 20) {return 0L;}
-                    else {numberBuf[numberLen] = '\0';}
+                    if(numberLen == 20) {
+                        _buf.clear();
+                        _buf.write(&val, 1);
+                        return 0L;
+                    } else {numberBuf[numberLen] = '\0';}
                     //store invalid digit in ringbuffer
                     _buf.write(&val, 1);
                     //proceed to evaluation
@@ -189,11 +203,82 @@ class ModemSerialESP : public ModemSerial {
         //turn valid characters into 'long' variable
         return strtol(numberBuf, NULL, 10);
     }
-/*
+
     float parseFloat() override {
-        return _stream.parseFloat();
+        //ignores all invalid characters before first valid one
+        //returns on timeout (and evaluates all valid chars up until then)
+        //or on first invalid char after valid ones.
+
+        TickType_t startTime = xTaskGetTickCount();
+        TickType_t timeoutTicks = pdMS_TO_TICKS(A76XX_SERIAL_TIMEOUT_DEFAULT);
+
+        _buf.clear(); //discard all values as ringbuffer is used as intermediate buffer
+        bool validNumber = false;
+        char validChars[] = "0123456789.-";
+        char numberBuf[20];
+        uint8_t val, numberLen;
+
+        while(1) {
+            //calculate remaining time
+            TickType_t elapsedTime = xTaskGetTickCount() - startTime;
+            if(elapsedTime > timeoutTicks) { //timeout
+                _buf.clear();
+                return 0.0f;
+            }
+            TickType_t remainingTime = timeoutTicks - elapsedTime;
+
+            if(validNumber) {
+                if(uart_read_bytes(_uart, &val, 1, remainingTime) != 1) { //timeout
+                    numberLen = _buf.read((uint8_t*) numberBuf, 20);
+                    if(numberLen == 20) {
+                        _buf.clear();
+                        return 0.0f;
+                    } else {numberBuf[numberLen] = '\0';}
+
+                    break; //go to evaluation
+                }
+                //check if char is valid
+                if(strchr(validChars, val)) {
+                    //store in ringbuffer
+                    _buf.write(&val, 1);
+                    if(val == '.') { // all remaining chars can only be digits
+                        validChars[10] = '\0';
+                    }
+                } else { //invalid digit after valid one(s)
+                    //transfer valid chars from ringbuffer to numberBuf
+                    numberLen = _buf.read((uint8_t*) numberBuf, 20);
+                    if(numberLen == 20) {
+                        _buf.clear();
+                        _buf.write(&val, 1);
+                        return 0.0f;
+                    } else {numberBuf[numberLen] = '\0';}
+                    //store invalid digit in ringbuffer
+                    _buf.write(&val, 1);
+                    //proceed to evaluation
+                    break;
+                }
+            } else {
+                //look for first occurrence of a valid char
+                if(uart_read_bytes(_uart, &val, 1, remainingTime) != 1) { //timeout
+                    return 0.0f;
+                }
+                //check if char is valid
+                if(strchr(validChars, val)) {
+                    //store in ringbuffer
+                    _buf.write(&val, 1);
+                    if(val == '.') { //first character was a dot, remaining ones can only be digits
+                        validChars[10] = '\0';
+                    } else {
+                        validChars[11] = '\0'; //remaining ones can be digits or dot
+                    }
+                    validNumber = true;
+                }
+            }
+        }
+        //turn valid characters into 'float' variable
+        return strtof(numberBuf, NULL);
     }
-*/
+
     void flush() override {
         uart_flush(_uart);
     }
@@ -220,6 +305,56 @@ class ModemSerialESP : public ModemSerial {
             return val;
         }
         return -1;
+    }
+
+    bool find(char terminator) override {
+        //first, go fishing in the ringbuffer
+        char val;
+        while(_buf.pop((uint8_t*) &val)) {
+            if(val == terminator) {
+                return true;
+            }
+        }
+        //when ringbuffer empty, go to UART input buffer
+        while(uart_read_bytes(_uart, &val, 1, pdMS_TO_TICKS(A76XX_SERIAL_TIMEOUT_DEFAULT)) == 1) {
+            if(val == terminator) {
+                return true;
+            }
+        }
+        //timeout
+        return false;
+    }
+
+    size_t write(const char* data) override {
+        return uart_write_bytes(_uart, data, strlen(data));
+    }
+
+    size_t write(const char* data, size_t size) override {
+        return uart_write_bytes(_uart, data, size);
+    }
+
+    size_t readBytesUntil(char terminator, char* buf, int len) override {
+        //first, fetch from ringbuffer
+        char val;
+        size_t writeLen = 0;
+        while(_buf.pop((uint8_t*) &val)) {
+            if(val == terminator) {
+                return writeLen;
+            }
+            //save value to buffer
+            buf[writeLen++] = val;
+            if(writeLen == len) return len;
+        }
+        //now, fetch from UART input buffer
+        while(uart_read_bytes(_uart, &val, 1, pdMS_TO_TICKS(A76XX_SERIAL_TIMEOUT_DEFAULT)) == 1) {
+            if(val == terminator) {
+                return writeLen;
+            }
+            buf[writeLen++] = val;
+            if(writeLen == len) return len;
+        }
+        //timeout
+        return 0;
     }
 
     size_t readBytes(void* buf, int len) override {

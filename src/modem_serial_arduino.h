@@ -145,6 +145,22 @@ class ModemSerialArduino : public ModemSerial {
         return _stream.read();
     }
 
+    bool find(char terminator) override {
+        return _stream.find(terminator);
+    }
+
+    size_t write(const char* data) override {
+        return _stream.write(data);
+    }
+
+    size_t write(const char* data, size_t size) override {
+        return _stream.write(data, size);
+    }
+
+    size_t readBytesUntil(char terminator, char* buf, int len) override {
+        return _stream.readBytesUntil(terminator, buf, len);
+    }
+
     size_t readBytes(void* buf, int len) override {
         return _stream.readBytes(buf, len);
     }

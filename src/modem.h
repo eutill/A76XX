@@ -266,4 +266,4 @@ class A76XX {
     void listen(uint32_t timeout = 100);
 };
 
-#endif A76XXMODEM_H_
+#endif /* A76XXMODEM_H_ */

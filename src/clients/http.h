@@ -168,4 +168,4 @@ class A76XXHTTPClient : public A76XXSecureClient {
                  const char* accept);
 };
 
-#endif A76XX_HTTP_CLIENT_H_
+#endif /* A76XX_HTTP_CLIENT_H_ */

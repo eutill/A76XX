@@ -135,7 +135,7 @@ class HTTPCommands {
                 }
 
                 // advance till we start with the actual content
-                _serial.find("\n");
+                _serial.find('\n');
 
                 // read as many bytes as we said
                 for (uint32_t i = 0; i < header_length; i++) {
@@ -250,4 +250,4 @@ class HTTPCommands {
     }
 };
 
-#endif A76XX_HTTP_CMDS_H_
+#endif /* A76XX_HTTP_CMDS_H_ */

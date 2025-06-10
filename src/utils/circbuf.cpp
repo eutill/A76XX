@@ -111,7 +111,13 @@ bool CircBuf::peek(uint8_t* val) {
     return false;
 }
 
-
+bool CircBuf::pop(uint8_t* val) {
+    if(peek(val)) {
+        _tail = (_tail + 1) % _size;
+        return true;
+    }
+    return false;
+}
 
 
 

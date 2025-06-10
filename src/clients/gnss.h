@@ -182,4 +182,4 @@ class A76XXGNSSClient : public A76XXBaseClient {
     }
 };
 
-#endif A76XX_GNSS_CLIENT_H_
+#endif /* A76XX_GNSS_CLIENT_H_ */

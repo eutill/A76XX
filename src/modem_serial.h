@@ -165,12 +165,12 @@ class ModemSerial {
 
         @param [IN] timeout Time out in milliseconds. Default is 50 milliseconds.
         @return The integer.
-    *//*
+    */
     int32_t parseIntClear(uint32_t timeout = 500) {
         int32_t retcode = parseInt();
         clear(timeout);
         return retcode;
-    }*/
+    }
 
     /*
         @brief Consume all data available in the stream, until the default
@@ -187,27 +187,14 @@ class ModemSerial {
     // object. If you need others, send a pull request!
     virtual int available() = 0;
     virtual long parseInt() = 0;
-    //virtual float parseFloat() = 0;
+    virtual float parseFloat() = 0;
     virtual void flush() = 0;
     virtual int peek() = 0;
     virtual int read() = 0;
-
-/*
-    template <typename ARG>
-    bool find(ARG arg) { 
-        return _stream.find(arg); 
-    }
-
-    template <typename... ARGS>
-    uint16_t write(ARGS... args) { 
-        return _stream.write(args...); 
-    }
-
-    template <typename... ARGS>
-    uint16_t readBytesUntil(ARGS... args) { 
-        return _stream.readBytesUntil(args...); 
-    }
-*/
+    virtual bool find(char terminator) = 0;
+    virtual size_t write(const char* data) = 0;
+    virtual size_t write(const char* data, size_t size) = 0;
+    virtual size_t readBytesUntil(char terminator, char* buf, int len) = 0;
     virtual size_t readBytes(void* buf, int len) = 0;
 
 };

@@ -268,7 +268,7 @@ class MQTTCommands {
 
         switch (rsp) {
             case Response_t::A76XX_RESPONSE_MATCH_1ST : {
-                _serial.write(payload, length);
+                _serial.write((const char*) payload, length);
                 _serial.flush();
                 if (_serial.waitResponse() == Response_t::A76XX_RESPONSE_OK) {
                     return A76XX_OPERATION_SUCCEEDED;
@@ -342,4 +342,4 @@ class MQTTCommands {
 
 };
 
-#endif A76XX_MQTT_CMDS_H_
+#endif /* A76XX_MQTT_CMDS_H_ */

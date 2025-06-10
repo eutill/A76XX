@@ -189,4 +189,4 @@ class A76XXMQTTClient : public A76XXSecureClient {
     bool isConnected();
 };
 
-#endif A76XX_MQTT_CLIENT_H_
+#endif /* A76XX_MQTT_CLIENT_H_ */
