@@ -6,6 +6,25 @@
 #include "driver/uart.h"
 #include "esp_log.h"
 
+void delay(unsigned long ms) {
+    vTaskDelay(pdMS_TO_TICKS(ms));
+}
+
+class TimeoutCalc {
+public:
+    TimeoutCalc(uint32_t timeoutMs) {
+        _start = xTaskGetTickCount();
+        _duration = pdMS_TO_TICKS(timeoutMs);
+    }
+    bool expired(void) {
+        return(!(xTaskGetTickCount() - _start < _duration));
+    }
+
+private:
+    TickType_t _start;
+    TickType_t _duration;
+};
+
 class ModemSerialESP : public ModemSerial {
   private:
     uart_port_t _uart;

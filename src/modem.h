@@ -198,14 +198,14 @@ class A76XX {
 
         @return The model identification string.
     */
-    String modelIdentification();
+    bool modelIdentification(char* buf, size_t len);
 
     /*
         @brief Get firmware revision identification string (AT+CGMR).
 
         @return The firmware revision identification string.
     */
-    String revisionIdentification();
+    bool revisionIdentification(char* buf, size_t len);
 
     /*
         @brief Sync device clock with an NTP server.
@@ -223,10 +223,13 @@ class A76XX {
 
     /*
         @brief Get date and time.
-        
-        @return A string in the format "yy/MM/dd,hh:mm:ss±zz"
+
+        @param[OUT] datetime A char array that has size > 20.
+            Will be populated with a string in the format "yy/MM/dd,hh:mm:ss±zz"
+
+        @return True on successful operation, false otherwise.
     */
-    String getDateTime();
+    bool getDateTime(char* datetime);
 
     /*
         @brief Get date and time.

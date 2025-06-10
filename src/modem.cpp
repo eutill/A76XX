@@ -110,8 +110,8 @@ bool A76XX::isRegistered(uint8_t net) {
 }
 
 bool A76XX::waitForRegistration(uint8_t net, uint32_t timeout) {
-    uint32_t tstart = millis();
-    while (millis() - tstart < timeout) {
+    TimeoutCalc tc(timeout);
+    while (!tc.expired()) {
         if (isRegistered(net) == true)
             return true;
         delay(200);
@@ -169,8 +169,8 @@ bool A76XX::restart(uint32_t timeout) {
 }
 
 bool A76XX::waitATUnresponsive(uint32_t timeout) {
-    uint32_t tstart = millis();
-    while (millis() - tstart < timeout) {
+    TimeoutCalc tc(timeout);
+    while (!tc.expired()) {
         serial.sendCMD("AT");
         if (serial.waitResponse(1000) == Response_t::A76XX_RESPONSE_TIMEOUT) {
             return true;
@@ -181,8 +181,8 @@ bool A76XX::waitATUnresponsive(uint32_t timeout) {
 }
 
 bool A76XX::waitATResponsive(uint32_t timeout) {
-    uint32_t tstart = millis();
-    while (millis() - tstart < timeout) {
+    TimeoutCalc tc(timeout);
+    while (!tc.expired()) {
         serial.sendCMD("AT");
         if (serial.waitResponse(1000) == Response_t::A76XX_RESPONSE_OK) {
             return true;
@@ -203,16 +203,16 @@ bool A76XX::wakeUp() {
     return serial.waitResponse() == Response_t::A76XX_RESPONSE_OK;
 }
 
-String A76XX::modelIdentification() {
-    String out;
-    _last_error_code = v25ter.modelIdentification(out);
-    return out;
+bool A76XX::modelIdentification(char* buf, size_t len) {
+    _last_error_code = v25ter.modelIdentification(buf, len);
+    if(_last_error_code == A76XX_OPERATION_SUCCEEDED) return true;
+    return false;
 }
 
-String A76XX::revisionIdentification() {
-    String out;
-    _last_error_code = v25ter.revisionIdentification(out);
-    return out;
+bool A76XX::revisionIdentification(char* buf, size_t len) {
+    _last_error_code = v25ter.revisionIdentification(buf, len);
+    if(_last_error_code == A76XX_OPERATION_SUCCEEDED) return true;
+    return false;
 }
 
 bool A76XX::syncTime(int8_t timezone, uint32_t timeout, const char* host) {
@@ -224,10 +224,10 @@ bool A76XX::syncTime(int8_t timezone, uint32_t timeout, const char* host) {
     return true;
 }
 
-String A76XX::getDateTime() {
-    char dateTime[] = "yy/MM/dd,hh:mm:ss+zz";
-    _last_error_code = statusControl.getDateTime(dateTime);
-    return dateTime;
+bool A76XX::getDateTime(char* datetime) {
+    _last_error_code = statusControl.getDateTime(datetime);
+    if(_last_error_code == A76XX_OPERATION_SUCCEEDED) return true;
+    return false;
 }
 
 bool A76XX::getDateTime(int* year,

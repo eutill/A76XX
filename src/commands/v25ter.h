@@ -64,13 +64,23 @@ class V25TERCommands {
         @param [IN] model will contain the model string on successful execution.
         @return A76XX_OPERATION_SUCCEEDED, A76XX_OPERATION_TIMEDOUT or A76XX_GENERIC_ERROR
     */
-    int8_t modelIdentification(String& model) {
+    int8_t modelIdentification(char* buf, size_t len) {
         // clear stream before sending command, then get rid of the first line
         _serial.clear();
         _serial.sendCMD("AT+CGMM");
         _serial.find('\n');
-        uint32_t tstart = millis();
-        while (millis() - tstart < 5000) {
+        size_t readLen = _serial.readBytesUntil('\r', buf, len);
+        _serial.clear();
+        if(readLen > 0) {
+            if(readLen == len) return A76XX_OUT_OF_MEMORY;
+            //add terminating null char
+            buf[readLen] = '\0';
+            return A76XX_OPERATION_SUCCEEDED;
+        }
+
+        /*
+        TimeoutCalc tc(5000);
+        while (!tc.expired()) {
             if (_serial.available() > 0) {
                 char c = static_cast<char>(_serial.read());
                 if (c == '\r') {
@@ -79,7 +89,7 @@ class V25TERCommands {
                 }
                 model += c;
             }
-        }
+        }*/
         return A76XX_OPERATION_TIMEDOUT;
     }
 
@@ -89,12 +99,12 @@ class V25TERCommands {
         @param [IN] model will contain the revision string on successful execution.
         @return A76XX_OPERATION_SUCCEEDED, A76XX_OPERATION_TIMEDOUT or A76XX_GENERIC_ERROR
     */
-    int8_t revisionIdentification(String& revision) {
+    int8_t revisionIdentification(char* buf, size_t len) {
         _serial.sendCMD("AT+CGMR");
         switch (_serial.waitResponse("+CGMR: ", 9000, false, false)) {
             case Response_t::A76XX_RESPONSE_MATCH_1ST : {
-                uint32_t tstart = millis();
-                while (millis() - tstart < 5000) {
+                /*TimeoutCalc tc(5000);
+                while (!tc.expired()) {
                     if (_serial.available() > 0) {
                         char c = static_cast<char>(_serial.read());
                         if (c == '\r') {
@@ -103,8 +113,15 @@ class V25TERCommands {
                         }
                         revision += c;
                     }
-                }
+                }*/
+                size_t readLen = _serial.readBytesUntil('\r', buf, len);
                 _serial.clear();
+                if(readLen > 0) {
+                    if(readLen == len) return A76XX_OUT_OF_MEMORY;
+                    //add terminating null char
+                    buf[readLen] = '\0';
+                    return A76XX_OPERATION_SUCCEEDED;
+                }
                 return A76XX_OPERATION_TIMEDOUT;
             }
             case Response_t::A76XX_RESPONSE_TIMEOUT : {

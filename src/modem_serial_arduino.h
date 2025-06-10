@@ -30,6 +30,20 @@ bool endsWith(CircularBuffer<char, N>& buf, const char* str) {
     return true;
 }
 
+class TimeoutCalc {
+public:
+    TimeoutCalc(uint32_t timeoutMs) {
+        _start = millis();
+        _duration = timeoutMs;
+    }
+    bool expired(void) {
+        return(!(millis() - _start < _duration));
+    }
+
+private:
+    uint32_t _start;
+    uint32_t _duration;
+};
 
 class ModemSerialArduino : public ModemSerial {
   private:
