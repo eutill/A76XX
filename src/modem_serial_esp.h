@@ -5,10 +5,13 @@
 
 #include "modem_serial.h"
 #include "utils/byteringbuf.h"
+
+extern "C"{
 #include "driver/uart.h"
 #include "esp_log.h"
+}
 
-void delay(unsigned long ms) {
+inline void delay(unsigned long ms) {
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 

@@ -35,7 +35,7 @@ bool A76XXHTTPClient::addHeader(const char* header, const char* value) {
 bool A76XXHTTPClient::addBasicAuthentication(const char* username, const char* password) {
     // Assume username and password are each no longer than 32 characters, then include
     // middle : and termination character. We also include storage for the string "Basic"
-    char credentials[72], output[89];
+    char credentials[95], output[89];
     snprintf(credentials, sizeof(credentials), "%s%s%s", username, ":", password);
     encodeBase64(credentials, strlen(credentials), output);
     snprintf(credentials, sizeof(credentials), "%s %s", "Basic", output);
