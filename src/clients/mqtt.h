@@ -74,8 +74,8 @@ class A76XXMQTTClient : public A76XXSecureClient {
     /*
         @brief Connect to the MQTT server.
 
-        @param [IN] server the server domain name or IP address. Must start with
-            "tcp://", e.g. "tcp://test.mosquitto.org".
+        @param [IN] server the server domain name or IP address,
+            e.g. "test.mosquitto.org".
         @param [IN] port the port we should connect to.
         @param [IN] clean_session where we should start a clean MQTT session.
         @param [IN] keep_alive time in second between PINGREQ packets to keep the

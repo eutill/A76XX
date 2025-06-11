@@ -97,13 +97,13 @@ class GNSSCommands {
             or A76XX_GNSS_NOT_READY.
     */
     int8_t powerControl(bool enable_GNSS) {
-        _serial.sendCMD("AT+CGNSSPWR=", enable_GNSS == true ? 1 : 0);
-        switch (_serial.waitResponse("+CGNSSPWR: READY!", 9000, false, true)) {
+        _serial.sendCMD("AT+CGNSSPWR=", enable_GNSS ? 1 : 0);
+        switch (_serial.waitResponse("+CGNSSPWR: READY!", 9000, !enable_GNSS, true)) {
             case Response_t::A76XX_RESPONSE_MATCH_1ST : {
                 return A76XX_OPERATION_SUCCEEDED;
             }
             case Response_t::A76XX_RESPONSE_OK : {
-                return A76XX_GNSS_NOT_READY;
+                return A76XX_OPERATION_SUCCEEDED;
             }
             case Response_t::A76XX_RESPONSE_TIMEOUT : {
                 return A76XX_OPERATION_TIMEDOUT;

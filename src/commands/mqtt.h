@@ -88,7 +88,7 @@ class MQTTCommands {
         Response_t rsp = _serial.waitResponse("+CMQTTREL: ", 9000, true, true);
 
         if (rsp == Response_t::A76XX_RESPONSE_OK)
-
+            return A76XX_OPERATION_SUCCEEDED;
         if (rsp == Response_t::A76XX_RESPONSE_ERROR)
             return A76XX_GENERIC_ERROR;
 
@@ -215,7 +215,7 @@ class MQTTCommands {
     // CMQTTDISC
     int8_t disconnect(uint8_t client_index, uint8_t timeout) {
         _serial.sendCMD("AT+CMQTTDISC=", client_index, ",", timeout);
-        Response_t rsp = _serial.waitResponse("+CMQTTDISC: ", timeout, false, true);
+        Response_t rsp = _serial.waitResponse("+CMQTTDISC: ", timeout*1000, false, true);
 
         // read int output
         switch (rsp) {
