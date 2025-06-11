@@ -132,6 +132,32 @@ class ModemSerialESP : public ModemSerial {
         flush();
     }
 
+    void printItem(char chr) override {
+        uart_write_bytes(_uart, &chr, 1);
+        flush();
+    }
+
+    void printItem(int val) override {
+        char buf[10];
+        int len = snprintf(buf, 10, "%i", val);
+        uart_write_bytes(_uart, buf, len);
+        flush();
+    }
+
+    void printItem(long unsigned int val) override {
+        char buf[10];
+        int len = snprintf(buf, 10, "%lu", val);
+        uart_write_bytes(_uart, buf, len);
+        flush();
+    }
+
+    void printItem(unsigned int val) override {
+        char buf[10];
+        int len = snprintf(buf, 10, "%u", val);
+        uart_write_bytes(_uart, buf, len);
+        flush();
+    }
+
     int available() override {
         int availBytes;
         if(uart_get_buffered_data_len(_uart, (size_t *) &availBytes) != ESP_OK) {

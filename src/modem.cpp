@@ -112,7 +112,7 @@ bool A76XX::isRegistered(uint8_t net) {
 bool A76XX::waitForRegistration(uint8_t net, uint32_t timeout) {
     TimeoutCalc tc(timeout);
     while (!tc.expired()) {
-        if (isRegistered(net) == true)
+        if (isRegistered(net))
             return true;
         delay(200);
     }

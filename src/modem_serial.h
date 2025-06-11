@@ -173,6 +173,11 @@ class ModemSerial {
     // single argument case
     virtual void printItem(uint16_t val) = 0;
     virtual void printItem(const char* str) = 0;
+    virtual void printItem(char chr) = 0;
+    virtual void printItem(int val) = 0;
+    virtual void printItem(long unsigned int val) = 0;
+    virtual void printItem(unsigned int val) = 0;
+
     // base case: do nothing
     void printCMD(void) {}
 

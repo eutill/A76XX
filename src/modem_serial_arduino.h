@@ -138,6 +138,26 @@ class ModemSerialArduino : public ModemSerial {
         flush();
     }
 
+    void printItem(char chr) override {
+        _stream.print(chr);
+        flush();
+    }
+
+    void printItem(int val) override {
+        _stream.print(val);
+        flush();
+    }
+
+    void printItem(long unsigned int val) override {
+        _stream.print(val);
+        flush();
+    }
+
+    void printItem(unsigned int val) override {
+        _stream.print(val);
+        flush();
+    }
+
     int available() override {
         return _stream.available();
     }

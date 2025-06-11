@@ -65,8 +65,8 @@ class StatusControlCommands {
         @brief Implementation for CCLK - READ Command.
         @detail Read date and time from module's real time clock
         @param [OUT] dateTime A char buffer to store the date and time in the format
-            "yy/MM/dd,hh:mm:ss±zz". Length must be at least 20 char, or A76XX_GENERIC_ERROR
-            is returned.
+            "yy/MM/dd,hh:mm:ss±zz". Length must be at least 21 char (including null terminator),
+            or A76XX_GENERIC_ERROR is returned.
         @return A76XX_OPERATION_SUCCEEDED, A76XX_OPERATION_TIMEDOUT or A76XX_GENERIC_ERROR.
     */
     int8_t getDateTime(char* dateTime) {
@@ -77,9 +77,12 @@ class StatusControlCommands {
         _serial.sendCMD("AT+CCLK?");
         switch (_serial.waitResponse("+CCLK: \"", 9000, false, true)) {
             case Response_t::A76XX_RESPONSE_MATCH_1ST : {
-                _serial.readBytes(dateTime, 20);
+                size_t readLen = _serial.readBytes(dateTime, 20);
+                dateTime[readLen] = '\0';
+
                 _serial.clear(); // clear OK
-                return A76XX_OPERATION_SUCCEEDED;
+                if(readLen == 20) return A76XX_OPERATION_SUCCEEDED;
+                return A76XX_GENERIC_ERROR;
             }
             case Response_t::A76XX_RESPONSE_TIMEOUT : {
                 return A76XX_OPERATION_TIMEDOUT;
