@@ -329,22 +329,63 @@ class GNSSCommands {
     */
     int8_t getGPSInfo(GPSInfo_t& info) {
         _serial.sendCMD("AT+CGPSINFO");
-        switch (_serial.waitResponse("+CGPSINFO:", 9000, false, true)) {
+        switch (_serial.waitResponse("+CGPSINFO: ", 9000, false, true)) {
             case Response_t::A76XX_RESPONSE_MATCH_1ST : {
-                // when we do not have a fix there should be an empty space after the :
-                if (_serial.peek() == ' ') { 
+                // when we do not have a fix there should be an empty space after the : - not true in my case
+                if (_serial.peek() == ',') {
                     info.hasfix = false;
                 } else {
                     info.hasfix = true;
-                    info.lat         = _serial.parseFloat(); _serial.find(',');
-                    info.NS          = _serial.read();       _serial.find(',');
-                    info.lon         = _serial.parseFloat(); _serial.find(',');
-                    info.EW          = _serial.read();       _serial.find(',');
-                    _serial.readBytes(info.date, 6);         _serial.find(',');
-                    _serial.readBytes(info.UTC_TIME, 9);     _serial.find(',');
-                    info.alt         = _serial.parseFloat(); _serial.find(',');
-                    info.speed       = _serial.parseFloat(); _serial.find(',');
-                    info.course      = _serial.parseFloat();
+                    char degreesBuf[4];
+
+                    if(_serial.peek() != ',') {
+                        //get 2 digits of lat degrees
+                        _serial.readBytes(degreesBuf, 2); degreesBuf[2] = '\0';
+                        //get lat minutes and combine them with degrees
+                        info.lat = (_serial.parseFloat() / 60.0f) + strtof(degreesBuf, NULL);
+                    } else {info.lat = 0.0f;}
+                     _serial.find(',');
+
+                     if(_serial.peek() != ',') {
+                         info.NS = _serial.read();
+                     } else {info.NS = 'N';}
+                    _serial.find(',');
+
+                    if(_serial.peek() != ',') {
+                        //same procedure with lon degrees and minutes, but lon degrees have 3 digits
+                        _serial.readBytes(degreesBuf, 3); degreesBuf[3] = '\0';
+                        info.lon = (_serial.parseFloat() / 60.0f) + strtof(degreesBuf, NULL);
+                    } else {info.lon = 0.0f;}
+                    _serial.find(',');
+
+                    if(_serial.peek() != ',') {
+                        info.EW = _serial.read();
+                    } else {info.EW = 'E';}
+                    _serial.find(',');
+
+                    if(_serial.peek() != ',') {
+                        _serial.readBytes(info.date, 6);
+                    } else {info.date[0] = '\0';}
+                    _serial.find(',');
+
+                    if(_serial.peek() != ',') {
+                        _serial.readBytes(info.UTC_TIME, 9);
+                    } else {info.UTC_TIME[0] = '\0';}
+                    _serial.find(',');
+
+                    if(_serial.peek() != ',') {
+                        info.alt = _serial.parseFloat();
+                    } else {info.alt = 0.0f;}
+                    _serial.find(',');
+
+                    if(_serial.peek() != ',') {
+                        info.speed = _serial.parseFloat();
+                    } else {info.speed = 0.0f;}
+                    _serial.find(',');
+
+                    if(_serial.peek() != '\r') {
+                        info.course = _serial.parseFloat();
+                    } else {info.course = 0.0f;}
                 }
                 // get last OK in any case
                 if (_serial.waitResponse(9000) == Response_t::A76XX_RESPONSE_OK) {

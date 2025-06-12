@@ -181,6 +181,12 @@ class A76XXGNSSClient : public A76XXBaseClient {
         A76XX_CLIENT_RETCODE_ASSERT_BOOL(retcode);
         return true;
     }
+
+    bool getAGPSData() {
+        int8_t retcode = _gnss_cmds.getAGPSData();
+        A76XX_CLIENT_RETCODE_ASSERT_BOOL(retcode);
+        return true;
+    }
 };
 
 #endif /* A76XX_GNSS_CLIENT_H_ */
