@@ -32,14 +32,16 @@ void MQTTOnMessageRx::process(ModemSerial* serial) {
 
     serial->waitResponse("+CMQTTRXEND: "); serial->find('\n');
 
-    messageQueue.push(msg);
+    //messageQueue.push(msg); //use callback function instead
+    if(_mqttEvtCb) _mqttEvtCb(&msg);
 }
 
-A76XXMQTTClient::A76XXMQTTClient(A76XX& modem, const char* clientID, bool use_ssl)
+A76XXMQTTClient::A76XXMQTTClient(A76XX& modem, const char* clientID, bool use_ssl, mqttEvtCb_t mqttCallback)
     : A76XXSecureClient(modem)
     , _mqtt_cmds(_serial)
     , _clientID(clientID)
     , _use_ssl(use_ssl)
+    , _on_message_rx_handler(mqttCallback)
     , _client_index(0)
     , _session_id(0) {
         // enable parsing MQTT URCs

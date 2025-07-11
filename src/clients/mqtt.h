@@ -9,6 +9,8 @@ struct MQTTMessage_t {
     char payload[MQTT_PAYLOAD_BUFFER_LEN];
 };
 
+typedef void (*mqttEvtCb_t) (MQTTMessage_t* msg);
+
 /*
     @brief Handler of the URC "+CMQTTRXSTART".
 
@@ -29,10 +31,14 @@ class MQTTOnMessageRx : public EventHandler_t {
   public:
     CircularBuffer<MQTTMessage_t, MQTT_MESSAGE_QUEUE_SIZE>  messageQueue;
     
-    MQTTOnMessageRx()
-        : EventHandler_t("+CMQTTRXSTART: ") {}
+    MQTTOnMessageRx(mqttEvtCb_t mqttEvtCb)
+        : EventHandler_t("+CMQTTRXSTART: "),
+          _mqttEvtCb(mqttEvtCb) {}
     
     void process(ModemSerial* serial);
+
+  private:
+    mqttEvtCb_t _mqttEvtCb;
 };
 
 
@@ -60,7 +66,7 @@ class A76XXMQTTClient : public A76XXSecureClient {
         @param [IN] clientID The client ID used for connecting to the broker.
         @param [IN] use_ssl Whether SSL/TLS encryption should be used.
     */
-    A76XXMQTTClient(A76XX& modem, const char* clientID, bool use_ssl = false);
+    A76XXMQTTClient(A76XX& modem, const char* clientID, bool use_ssl = false, mqttEvtCb_t mqttCallback = NULL);
 
     /*
         @brief Start the MQTT service.
