@@ -18,7 +18,7 @@ The table below shows the protocols that are natively supported by the firmware 
 | HTTP[S]          | Yes                 |
 | LWM2M            | No                  |
 | MQTT[S]          | Yes                 |
-| SMS              | No                  |
+| SMS              | Yes                 |
 | SMTPS            | No                  |
 | TCP/IP           | No                  |
 | WebSockets[S]    | No                  |
@@ -36,6 +36,7 @@ Note that the firmware in your module might be outdated, and therefore might not
 | 4       | Network          | A76XX             | modem.h          | commands/network.h          |
 | 5       | Packet Domain    | A76XX             | modem.h          | commands/packet_domain.h    |
 | 6       | SIM Card         | A76XX             | modem.h          | commands/sim.h              |
+| 9       | SMS              | A76XXSMSClient    | clients/sms.h    | commands/sms.h              |
 | 10      | Serial Interface | A76XX             | modem.h          | commands/serial_interface.h |
 | 14      | Internet Service | A76XX             | modem.h          | commands/internet_service.h |
 | 16      | HTTP(S)          | A76XXHTTPClient   | clients/http.h   | commands/http.h             |
@@ -51,6 +52,7 @@ The table below shows a list of A76XX modules and the protocols/features that ha
 | Module      | MQTT[S] tested | HTTP[S] tested |
 | ----------- | -------------  | -------------  |
 | A7608E      | Yes[Yes]       | Yes[Yes]       |
+| A7670E      | Yes[Yes]       | No[No]         |
 
 
 ## Documentation and examples

@@ -26,9 +26,16 @@
     AT+CGMM  |     y       | READ   | modelIdentification
     AT+CGMR  |     y       | READ   | revisionIdentification
     AT+CGSN  |             |        |
-    AT+CSCS  |             |        |
+    AT+CSCS  |     y       | WRITE  | characterSet
     AT+GCAP  |             |        |
 */
+
+typedef enum {
+    A76XX_CHARSET_IRA = 0,
+    A76XX_CHARSET_UCS2 = 1,
+    A76XX_CHARSET_HEX = 2,
+    A76XX_CHARSET_GSM = 3
+} characterSet_t;
 
 class V25TERCommands {
   public:
@@ -132,6 +139,25 @@ class V25TERCommands {
             }
         }
     }
+
+    /*
+        @brief Implementation for CSCS - WRITE Command.
+        @detail Set the character set for string input/output operations such as SMS r/w, phonebook etc.
+        @param [IN] charset contains the desired character set.
+        @return A76XX_OPERATION_SUCCEEDED, A76XX_OPERATION_TIMEDOUT or A76XX_GENERIC_ERROR
+    */
+    int8_t characterSet(characterSet_t charset = A76XX_CHARSET_IRA) {
+        const char* charSetStr[] = {
+            "IRA",
+            "UCS2",
+            "HEX",
+            "GSM"
+        };
+        _serial.sendCMD("AT+CSCS=\"", charSetStr[charset], '\"');
+        Response_t rsp = _serial.waitResponse();
+        A76XX_RESPONSE_PROCESS(rsp)
+   }
+
 };
 
 #endif /* A76XX_V25TER_CMDS_H_ */

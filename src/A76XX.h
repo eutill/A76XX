@@ -47,6 +47,38 @@
     #define GNSS_NMEA_QUEUE_SIZE 32
 #endif
 
+#ifndef SMS_SENDER_BUFFER_LEN
+    /*
+        Sets the size for a buffer containing an SMS Address,
+        be it numerical (telephone number) or alphanumerical (label).
+    */
+   #define SMS_SENDER_BUFFER_LEN 20
+#endif
+
+#ifndef SMS_DATA_BUFFER_LEN
+    /*
+        Sets the size for a buffer containing an SMS' worth of data,
+        typically 160 bytes in the case of un-packed 7-bit GSM.
+    */
+    #define SMS_DATA_BUFFER_LEN 160
+#endif
+
+#ifndef SMS_DECODED_BUFFER_LEN
+    /*
+        Sets the size for a buffer containing an SMS' decoded data,
+        maximum 160 bytes plus terminating null char.
+    */
+    #define SMS_DECODED_BUFFER_LEN 161
+#endif
+
+#ifndef SMS_PDU_LEN
+    /*
+        Sets the size for a buffer containing the binary representation
+        of an SMS PDU
+    */
+    #define SMS_PDU_LEN ( (SMS_SENDER_BUFFER_LEN / 2) + 150)
+#endif
+
 enum Response_t {
     A76XX_RESPONSE_OK        = 0,
     A76XX_RESPONSE_MATCH_1ST = 1,
@@ -112,6 +144,7 @@ enum Response_t {
 #include "utils/base64.h"
 #include "utils/byteringbuf.h"
 #include "utils/CircularBuffer.hpp"
+#include "utils/smsCoding.h"
 
 #include "event_handlers.h"
 #include "modem_serial.h"
@@ -129,6 +162,7 @@ enum Response_t {
 #include "commands/gnss.h"
 #include "commands/ssl.h"
 #include "commands/sim.h"
+#include "commands/sms.h"
 
 #include "modem.h"
 
@@ -137,5 +171,6 @@ enum Response_t {
 #include "clients/mqtt.h"
 #include "clients/http.h"
 #include "clients/gnss.h"
+#include "clients/sms.h"
 
 #endif /* A76XX_H_ */
